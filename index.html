@@ -117,7 +117,17 @@
       socials: [
         {label:"Instagram", url:"https://instagram.com/mvvthw"}
       ],
-      work: {
+      credits: [
+    "Really Rich / Kankan — Clothing Designs",
+    "1Oneam — Merch Management, Clothing Designs, Web Development, Merch Fulfillment",
+    "Boxboys — Show Flyers, Clothing Designs",
+    "Diorvsyou — Album Covers",
+    "Lyrical Lemonade — 3D Animation, Show Flyers",
+    "Twinuzis / Autumn — 3D Animation",
+    "Hyperpopdaily — YouTube Thumbnails, 3D Modeling",
+    "Skimask The Slump God — Show Flyer"
+  ],
+  work: {
         clothing: [
           {src:"https://raw.githubusercontent.com/mvvthw/portfolioimages/refs/heads/main/1c.png", title:"Hoodie"},
           {src:"https://raw.githubusercontent.com/mvvthw/portfolioimages/refs/heads/main/16.png", title:"Tee"},
@@ -145,17 +155,7 @@
           {src:"https://raw.githubusercontent.com/mvvthw/portfolioimages/refs/heads/main/4cover%20(11).png", title:"Cover B"},
           {src:"https://raw.githubusercontent.com/mvvthw/portfolioimages/refs/heads/main/4cover%20(3).png", title:"Cover B"},
           {src:"https://raw.githubusercontent.com/mvvthw/portfolioimages/refs/heads/main/4cover%20(7).png", title:"Cover B"}
-        ],
-        credits: [
-  "Really Rich / Kankan — Clothing Designs",
-  "1Oneam — Merch Management, Clothing Designs, Web Development, Merch Fulfillment",
-  "Boxboys — Show Flyers, Clothing Designs",
-  "Diorvsyou — Album Covers",
-  "Lyrical Lemonade — 3D Animation, Show Flyers",
-  "Twinuzis / Autumn — 3D Animation",
-  "Hyperpopdaily — YouTube Thumbnails, 3D Modeling",
-  "Skimask The Slump God — Show Flyer"
-]
+        ]
       }
     };
 
@@ -200,7 +200,8 @@
     }
 
     function help(){
-      const list = `\nCommands:\n  <span class="tag">about</span>    People & companies I've worked with\n  <span class="tag">credits</span>     Who I am\n  <span class="tag">work</span>         List categories\n  <span class="tag">show [cat]</span>   Show a category grid\n  <span class="tag">contact</span>      Email & socials\n  <span class="tag">clear</span>        Clear the screen\n  <span class="tag">theme</span>        Toggle light/dark\n  <span class="tag">help</span>         Show this menu`;
+      const list = `\nCommands:\n  <span class="tag">about</span>        Who I am\n  <span class="tag">work</span>         List categories\n  <span class="tag">show [cat]</span>   Show a category grid\n  <span class="tag">contact</span>      Email & socials\n  <span class="tag">clear</span>        Clear the screen\n  <span class="tag">theme</span>        Toggle light/dark\n  <span class="tag">help</span>
+  <span class=\"tag\">credits</span>       People & companies I've worked with         Show this menu`;
       write(list);
     }
 
@@ -208,16 +209,15 @@
       print(`I'm <strong>${SITE.name}</strong> — I’ve been involved in creative arts since I was 12, starting with banners and logos for YouTubers—since I spent most of my time watching YouTube back then. Over time, I developed a passion for digital creation, whether it was making intros in Cinema 4D and After Effects, or designing thumbnails and banners in Photoshop. As I got older, I discovered a love for clothing; buying brands like Supreme and Bape inspired me to design apparel myself. Now, years later, I’m still doing what I love—only with far more skill and experience.`);
     }
 
-    function credits(){
-  print("<strong>Credits</strong>");
-  SITE.credits.forEach(c => write(c));
-}
-
-
     function work(){
       const cats = Object.keys(SITE.work);
       const lines = cats.map(c=>`- <strong>${c}</strong> — type <code>show ${c}</code>`).join('\n');
       print(lines);
+    }
+
+    function credits(){
+      print("<strong>Credits</strong>");
+      SITE.credits.forEach(c => write(c));
     }
 
     function show(cat){
@@ -257,9 +257,10 @@
       }
     }
 
-    function notFound(cmd){ print(`Command not found: <code>${cmd}</code>. Type <span class="tag">help</span>.`, 'err'); }
+    if(cmd === 'credits'){ credits(); return; }
+function notFound(cmd){ print(`Command not found: <code>${cmd}</code>. Type <span class="tag">help</span>.`, 'err'); }
 
-    state.commands = { help, about, credits, work, show, contact, clear, theme };
+    state.commands = { help, about, work, show, contact, clear, theme };
 
     function run(cmd){
       if(!cmd) return;
