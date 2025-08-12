@@ -50,7 +50,16 @@
 /* Mobile tuning */
 #ascii-art{margin:0; white-space:pre; line-height:1.05}
 @media (max-width:640px){
-  #input::placeholder{color:var(--muted);opacity:1}
+  #input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+@media (min-width: 641px) {
+  #input::placeholder {
+    color: transparent;
+  }
+}
+
 }
 
   </style>
