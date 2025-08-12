@@ -36,7 +36,7 @@
     .footer{position:absolute;left:0;right:0;bottom:8px;color:var(--muted);font-size:12px;padding:0 18px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
     .tag{display:inline-block;margin:2px 0;background:rgba(125,211,252,.1);border:1px solid var(--accent);padding:2px 8px;border-radius:999px;color:var(--accent)}
     .row.ok{color:var(--ok)}.row.warn{color:var(--warn)}.row.err{color:var(--err)}
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:8px}
+    .grid{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:12px;margin-top:8px}
     .thumb{display:flex;align-items:center;justify-content:center;border:1px solid rgba(125,211,252,.25);border-radius:12px;overflow:hidden;aspect-ratio:1/1;background:transparent}
     .thumb img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
     .cap{font-size:12px;color:var(--muted);margin-top:4px}
@@ -46,27 +46,10 @@
     .lightbox .close{position:absolute;top:16px;right:18px;font-size:28px;line-height:1;cursor:pointer;color:var(--fg)}
     @media (max-width:640px){.output{font-size:15px}.wrap{padding:16px 12px max(16px, env(safe-area-inset-bottom))}.term{padding-bottom:112px}.grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}.thumb img{max-width:96%;max-height:96%}}.wrap{padding:16px}.term{padding-bottom:104px}.grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}.thumb img{max-width:96%;max-height:96%}}
   
-/* === Minimal mobile tuning === */
+/* Mobile tuning */
+#ascii-art{margin:0; white-space:pre; line-height:1.05}
 @media (max-width:640px){
-  .output{font-size:12px}
-  .grid{grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
-  .thumb{padding:0}
-  .thumb img{max-width:100%; max-height:100%}
-}
-@media (max-width:380px){
-  .output{font-size:11px}
-}
-/* Lock background scroll when lightbox open */
-body.lb-open{overflow:hidden}
-
-  
-}
-
-  
-/* Responsive ASCII only */
-.ascii-art{margin:0; white-space:pre; overflow:hidden; font-size:clamp(9px, 4.2vw, 14px); line-height:1.05}
-@media (max-width:380px){
-  .ascii-art{font-size:clamp(9px, 4.8vw, 12px)}
+  #input::placeholder{color:var(--muted);opacity:1}
 }
 
   </style>
@@ -83,7 +66,7 @@ body.lb-open{overflow:hidden}
       <div id="output" class="output"></div>
       <div class="cmdline">
         <span class="prompt">guest@mvvthw:~$</span>
-        <input id="input" type="text" autocomplete="off" spellcheck="false" />
+        <input id="input" type="text" autocomplete="off" spellcheck="false" placeholder="Tap here to type" />
         <span class="cursor"></span>
       </div>
       <div class="footer">
@@ -170,7 +153,7 @@ body.lb-open{overflow:hidden}
 
     function banner(){
       const art = `\n███╗   ███╗██╗   ██╗██╗   ██╗████████╗██╗  ██╗██╗    ██╗\n████╗ ████║██║   ██║██║   ██║╚══██╔══╝██║  ██║██║    ██║\n██╔████╔██║██║   ██║██║   ██║   ██║   ███████║██║ █╗ ██║\n██║╚██╔╝██║╚██╗ ██╔╝╚██╗ ██╔╝   ██║   ██╔══██║██║███╗██║\n██║ ╚═╝ ██║ ╚████╔╝  ╚████╔╝    ██║   ██║  ██║╚███╔███╔╝\n╚═╝     ╚═╝  ╚═══╝    ╚═══╝     ╚═╝   ╚═╝  ╚═╝ ╚══╝╚══╝ \n`;
-      write(`<pre class="ascii-art">${art}</pre>`);
+      write(`<pre id="ascii-art">${art}</pre>`);
       write(`<strong>${SITE.name}</strong> — ${SITE.tagline}`);
       write(`Location: ${SITE.location}`);
       write("");
@@ -290,20 +273,48 @@ body.lb-open{overflow:hidden}
         e.preventDefault();
         lbImg.src = a.getAttribute('href');
         lbImg.alt = a.querySelector('img')?.alt || '';
-        document.body.classList.add('lb-open'); lb.classList.add('open');
+        lb.classList.add('open');
         lb.setAttribute('aria-hidden','false');
       }
     });
 
-    lb.addEventListener('click', ()=>{ lb.classList.remove('open'); document.body.classList.remove('lb-open'); lb.setAttribute('aria-hidden','true'); lbImg.removeAttribute('src'); });
-    document.querySelector('#lightbox .close').addEventListener('click', (e)=>{ e.stopPropagation(); lb.classList.remove('open'); document.body.classList.remove('lb-open'); lb.setAttribute('aria-hidden','true'); lbImg.removeAttribute('src'); });
-    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')){ lb.classList.remove('open'); document.body.classList.remove('lb-open'); lb.setAttribute('aria-hidden','true'); lbImg.removeAttribute('src'); }});
+    lb.addEventListener('click', ()=>{ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); lbImg.removeAttribute('src'); });
+    document.querySelector('#lightbox .close').addEventListener('click', (e)=>{ e.stopPropagation(); lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); lbImg.removeAttribute('src'); });
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')){ lb.classList.remove('open'); lb.setAttribute('aria-hidden','true'); lbImg.removeAttribute('src'); }});
 
     document.addEventListener('click', ()=> input.focus());
     banner();
     help();
+    fitAscii();
     input.focus();
-
+  
+// Fit ASCII art to available width on mobile/any narrow viewport
+function fitAscii(){
+  const pre = document.getElementById('ascii-art');
+  if(!pre) return;
+  // Use the parent (output) width as constraint
+  const parent = pre.parentElement;
+  if(!parent) return;
+  // Reset any previous sizing
+  pre.style.fontSize = '';
+  // Calculate widths
+  const available = parent.clientWidth;
+  let scrollW = pre.scrollWidth;
+  if(scrollW === 0) return;
+  if(scrollW > available){
+    const current = parseFloat(getComputedStyle(pre).fontSize) || 16;
+    const ratio = available / scrollW;
+    const target = Math.max(9, Math.floor(current * ratio));
+    pre.style.fontSize = target + 'px';
+    // If still a hair too wide, nudge once more
+    if(pre.scrollWidth > available){
+      const second = Math.max(9, target - 1);
+      pre.style.fontSize = second + 'px';
+    }
+  }
+}
+window.addEventListener('load', fitAscii);
+window.addEventListener('resize', fitAscii);
 
   </script>
 </body>
