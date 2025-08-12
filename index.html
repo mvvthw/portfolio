@@ -60,9 +60,14 @@
 body.lb-open{overflow:hidden}
 
   
-/* Mobile typing indicator */
-.mobile-type-hint{display:none;margin-left:8px;border:1px solid var(--accent);color:var(--accent);padding:6px 10px;border-radius:999px;font-size:12px}
-@media (max-width:640px){ .mobile-type-hint{display:inline-flex;align-items:center} }
+}
+
+  
+/* Responsive ASCII only */
+.ascii-art{margin:0; white-space:pre; overflow:hidden; font-size:clamp(9px, 4.2vw, 14px); line-height:1.05}
+@media (max-width:380px){
+  .ascii-art{font-size:clamp(9px, 4.8vw, 12px)}
+}
 
   </style>
 </head>
@@ -79,7 +84,6 @@ body.lb-open{overflow:hidden}
       <div class="cmdline">
         <span class="prompt">guest@mvvthw:~$</span>
         <input id="input" type="text" autocomplete="off" spellcheck="false" />
-        <span class="mobile-type-hint" role="button" tabindex="0">Tap here to type</span>
         <span class="cursor"></span>
       </div>
       <div class="footer">
@@ -166,7 +170,7 @@ body.lb-open{overflow:hidden}
 
     function banner(){
       const art = `\n███╗   ███╗██╗   ██╗██╗   ██╗████████╗██╗  ██╗██╗    ██╗\n████╗ ████║██║   ██║██║   ██║╚══██╔══╝██║  ██║██║    ██║\n██╔████╔██║██║   ██║██║   ██║   ██║   ███████║██║ █╗ ██║\n██║╚██╔╝██║╚██╗ ██╔╝╚██╗ ██╔╝   ██║   ██╔══██║██║███╗██║\n██║ ╚═╝ ██║ ╚████╔╝  ╚████╔╝    ██║   ██║  ██║╚███╔███╔╝\n╚═╝     ╚═╝  ╚═══╝    ╚═══╝     ╚═╝   ╚═╝  ╚═╝ ╚══╝╚══╝ \n`;
-      write(`<pre>${art}</pre>`);
+      write(`<pre class="ascii-art">${art}</pre>`);
       write(`<strong>${SITE.name}</strong> — ${SITE.tagline}`);
       write(`Location: ${SITE.location}`);
       write("");
@@ -300,19 +304,6 @@ body.lb-open{overflow:hidden}
     help();
     input.focus();
 
-// Mobile typing hint behavior
-(function(){
-  const hint = document.querySelector('.mobile-type-hint');
-  const input = document.getElementById('input');
-  if(!hint || !input) return;
-  const isMobile = matchMedia('(max-width:640px)').matches;
-  if(!isMobile){ hint.style.display='none'; return; }
-  function hide(){ hint.style.display='none'; }
-  hint.addEventListener('click', ()=>{ input.focus(); hide(); });
-  hint.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); input.focus(); hide(); } });
-  input.addEventListener('focus', hide, {passive:true});
-  input.addEventListener('input', hide, {passive:true});
-})();
 
   </script>
 </body>
