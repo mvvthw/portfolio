@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>mvvthw — terminal</title>
   <style>
-
     :root{
       --bg:#0b0f14;
       --fg:#d8dee9;
@@ -16,19 +15,16 @@
       --err:#fb7185;
       --font: ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono", Consolas, monospace;
     }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);line-height:1.5}
-    img, a, pre, code {user-select:none}
-    img{-webkit-user-drag:none}
-    .wrap{max-width:1100px;margin:0 auto;padding:24px 16px max(16px, env(safe-area-inset-bottom))}
-    .term{border:1px solid var(--muted);border-radius:6px;padding:18px 18px 96px;min-height:70vh;position:relative;overflow:hidden}
+    .wrap{max-width:980px;margin:0 auto;padding:24px 16px max(16px, env(safe-area-inset-bottom))}
+    .term{border:1px solid var(--muted);border-radius:6px;padding:18px 18px 96px;min-height:70vh;position:relative}
     .titlebar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
     .dot{width:12px;height:12px;border-radius:50%}
     .dot.red{background:#ff5f56}.dot.yellow{background:#ffbd2e}.dot.green{background:#27c93f}
     .titlebar .path{color:var(--muted);font-size:14px}
-    .output{font-size:clamp(14px,1.6vw,16px);line-height:1.6;white-space:pre-wrap overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; max-width:100%;}
-
+    .output{font-size:clamp(14px,1.6vw,16px);line-height:1.6;white-space:pre-wrap}
     .cmdline{display:flex;gap:8px;align-items:center;margin-top:8px;position:sticky;bottom:0;padding:10px 0;background:linear-gradient(180deg, rgba(11,15,20,0) 0%, rgba(11,15,20,.85) 40%, rgba(11,15,20,1) 100%);backdrop-filter:blur(2px)}
     .prompt{color:var(--accent)}
     #input{flex:1;background:transparent;border:none;outline:none;color:var(--fg);font:inherit;min-height:44px;padding:6px 0}
@@ -40,52 +36,33 @@
     .footer{position:absolute;left:0;right:0;bottom:8px;color:var(--muted);font-size:12px;padding:0 18px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
     .tag{display:inline-block;margin:2px 0;background:rgba(125,211,252,.1);border:1px solid var(--accent);padding:2px 8px;border-radius:999px;color:var(--accent)}
     .row.ok{color:var(--ok)}.row.warn{color:var(--warn)}.row.err{color:var(--err)}
-    .mobile-type-hint{display:none;margin-left:6px;border:1px dashed var(--muted);color:var(--muted);
-      padding:4px 10px;border-radius:999px;font-size:12px;user-select:none}
-    @media (max-width:640px){
-      .mobile-type-hint{display:inline-flex;align-items:center}
-    }
-
-
-    /* === CATEGORY GRID === */
-    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
-    .thumb{display:flex;align-items:center;justify-content:center;border:1px solid rgba(125,211,252,.25);border-radius:14px;overflow:hidden;aspect-ratio:1/1;background:transparent;touch-action:manipulation;padding:2px}
-    .thumb img{display:block;width:98%;height:98%;object-fit:contain}
-    .cap{font-size:12px;color:var(--muted);margin-top:6px}
-
-    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:9999;padding:24px;overscroll-behavior:contain}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:8px}
+    .thumb{display:flex;align-items:center;justify-content:center;border:1px solid rgba(125,211,252,.25);border-radius:12px;overflow:hidden;aspect-ratio:1/1;background:transparent}
+    .thumb img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+    .cap{font-size:12px;color:var(--muted);margin-top:4px}
+    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50;padding:24px}
     .lightbox.open{display:flex}
-    .lightbox img{max-width:96vw;max-height:85vh;border:1px solid rgba(125,211,252,.35);border-radius:12px;pointer-events:auto}
+    .lightbox img{max-width:96vw;max-height:90vh;border:1px solid rgba(125,211,252,.35);border-radius:12px}
     .lightbox .close{position:absolute;top:16px;right:18px;font-size:28px;line-height:1;cursor:pointer;color:var(--fg)}
-
-    /* === RESPONSIVE TWEAKS === */
-      
-      @media (max-width:640px){
-        .output{font-size:13pxmax-width:100%;}
-
-        
-      }
-
-    @media (max-width:640px){
-      .wrap{padding:16px 12px max(16px, env(safe-area-inset-bottom))}
-      .term{padding-bottom:112px}
-      .output{font-size:15px overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; max-width:100%;}
-
-      .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px} /* still 3 per row; slightly tighter gap */
-      .thumb img{display:block;width:98%;height:98%;object-fit:contain}
-    }
-    @media (min-width:1280px){
-      .wrap{max-width:1200px}
-      .output{font-size:clamp(15px,1.2vw,18px) overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; max-width:100%;}
-
-    }
+    @media (max-width:640px){.output{font-size:15px}.wrap{padding:16px 12px max(16px, env(safe-area-inset-bottom))}.term{padding-bottom:112px}.grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}.thumb img{max-width:96%;max-height:96%}}.wrap{padding:16px}.term{padding-bottom:104px}.grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}.thumb img{max-width:96%;max-height:96%}}
+  
+/* === Minimal mobile tuning === */
+@media (max-width:640px){
+  .output{font-size:12px}
+  .grid{grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
+  .thumb{padding:0}
+  .thumb img{max-width:100%; max-height:100%}
+}
+@media (max-width:380px){
+  .output{font-size:11px}
+}
+/* Lock background scroll when lightbox open */
+body.lb-open{overflow:hidden}
 
   
-    .mobile-type-hint{display:none;margin-left:8px;border:1px solid var(--accent);color:var(--accent);
-      padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;user-select:none;background:rgba(125,211,252,.08)}
-    @media (max-width:640px){
-      .mobile-type-hint{display:inline-flex;align-items:center}
-    }
+/* Mobile typing indicator */
+.mobile-type-hint{display:none;margin-left:8px;border:1px solid var(--accent);color:var(--accent);padding:6px 10px;border-radius:999px;font-size:12px}
+@media (max-width:640px){ .mobile-type-hint{display:inline-flex;align-items:center} }
 
   </style>
 </head>
@@ -101,7 +78,8 @@
       <div id="output" class="output"></div>
       <div class="cmdline">
         <span class="prompt">guest@mvvthw:~$</span>
-        <input id="input" placeholder="" /><span class="mobile-type-hint" role="button" tabindex="0" aria-label="Tap to type">Tap here to type</span> type="text" autocomplete="off" spellcheck="false" />
+        <input id="input" type="text" autocomplete="off" spellcheck="false" />
+        <span class="mobile-type-hint" role="button" tabindex="0">Tap here to type</span>
         <span class="cursor"></span>
       </div>
       <div class="footer">
@@ -161,58 +139,6 @@
     const lbImg = document.getElementById('lb-img');
     const state = {history: [], index: -1, commands: {}, theme: 'dark'};
 
-    // Mobile-only scroll hint for wide ASCII
-    function addScrollHintIfNeeded(){
-      const out = document.querySelector('.output');
-      if(!out) return;
-      const isMobile = window.matchMedia('(max-width:640px)').matches;
-      if(!isMobile) return;
-      const already = document.querySelector('.scroll-hint');
-      if(out.scrollWidth > out.clientWidth && !already){
-        const hint = document.createElement('div');
-        hint.className='scroll-hint';
-        hint.textContent='';
-        out.insertAdjacentElement('afterend', hint);
-        let hidden=false;
-        const hide = ()=>{
-          if(hidden) return;
-          hint.style.display='none'; hidden=true;
-        };
-        out.addEventListener('scroll', ()=>{
-          if(out.scrollLeft>8) hide();
-        }, {passive:true});
-        setTimeout(hide, 4000);
-      }
-    }
-    window.addEventListener('load', addScrollHintIfNeeded);
-    window.addEventListener('resize', addScrollHintIfNeeded);
-
-
-    const originalOverflow = document.body.style.overflow;
-    
-    let __originalOverflow = '';
-    function openLightbox(){
-      __originalOverflow = document.documentElement.style.overflow || '';
-      document.documentElement.style.overflow='hidden';
-      document.body.style.overflow='hidden';
-      lb.classList.add('open');
-      lb.setAttribute('aria-hidden','false');
-    }
-    function closeLightbox(){
-      lb.classList.remove('open');
-      lb.setAttribute('aria-hidden','true');
-      lbImg.removeAttribute('src');
-      document.documentElement.style.overflow=__originalOverflow;
-      document.body.style.overflow='';
-    }
-    function closeLightbox() {
-      lb.classList.remove('open');
-      lb.setAttribute('aria-hidden','true');
-      lbImg.removeAttribute('src');
-      document.body.style.overflow=originalOverflow || '';
-    }
-
-
     function typePrint(text, cls="", speed=10) {
       return new Promise(resolve => {
         const el = document.createElement('div');
@@ -268,7 +194,7 @@
       if(!items){ print(`No category: <code>${cat}</code>`, 'err'); return; }
       const grid = `<div class="grid">${items.map((it,i)=>`
         <a class="thumb" href="${it.src}" data-cat="${cat}" data-idx="${i}">
-          <img loading="lazy" decoding="async" src="${it.src}" alt="${it.title||cat} ${i+1}">
+          <img src="${it.src}" alt="${it.title||cat} ${i+1}">
         </a>
       `).join('')}</div>`;
       print(`<strong>${cat}</strong>`, '');
@@ -360,37 +286,33 @@
         e.preventDefault();
         lbImg.src = a.getAttribute('href');
         lbImg.alt = a.querySelector('img')?.alt || '';
-        openLightbox();
+        document.body.classList.add('lb-open'); lb.classList.add('open');
+        lb.setAttribute('aria-hidden','false');
       }
     });
 
-    lb.addEventListener('click', (e)=>{ if(e.target === lb) { closeLightbox(); } });});
-    document.querySelector('#lightbox .close').addEventListener('click', (e)=>{ e.stopPropagation(); closeLightbox(); });
-    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')){ closeLightbox(); }});
+    lb.addEventListener('click', ()=>{ lb.classList.remove('open'); document.body.classList.remove('lb-open'); lb.setAttribute('aria-hidden','true'); lbImg.removeAttribute('src'); });
+    document.querySelector('#lightbox .close').addEventListener('click', (e)=>{ e.stopPropagation(); lb.classList.remove('open'); document.body.classList.remove('lb-open'); lb.setAttribute('aria-hidden','true'); lbImg.removeAttribute('src'); });
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')){ lb.classList.remove('open'); document.body.classList.remove('lb-open'); lb.setAttribute('aria-hidden','true'); lbImg.removeAttribute('src'); }});
 
     document.addEventListener('click', ()=> input.focus());
     banner();
     help();
     input.focus();
-  
-    
-  
-    // Mobile-only 'Tap here to type' logic (clean)
-    (function(){
-      const input = document.getElementById('input');
-      const hint = document.querySelector('.mobile-type-hint');
-      if(!input || !hint) return;
-      const isMobile = matchMedia('(max-width:640px)').matches;
-      if(!isMobile){ hint.style.display='none'; return; }
-      function show(){ hint.style.display='inline-flex'; }
-      function hide(){ hint.style.display='none'; }
-      const focusInput = (e)=>{ e && e.preventDefault(); input.focus(); };
-      hint.addEventListener('click', focusInput);
-      hint.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') focusInput(e); });
-      input.addEventListener('focus', hide, {passive:true});
-      input.addEventListener('input', hide, {passive:true});
-      setTimeout(show, 0);
-    })();
+
+// Mobile typing hint behavior
+(function(){
+  const hint = document.querySelector('.mobile-type-hint');
+  const input = document.getElementById('input');
+  if(!hint || !input) return;
+  const isMobile = matchMedia('(max-width:640px)').matches;
+  if(!isMobile){ hint.style.display='none'; return; }
+  function hide(){ hint.style.display='none'; }
+  hint.addEventListener('click', ()=>{ input.focus(); hide(); });
+  hint.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); input.focus(); hide(); } });
+  input.addEventListener('focus', hide, {passive:true});
+  input.addEventListener('input', hide, {passive:true});
+})();
 
   </script>
 </body>
