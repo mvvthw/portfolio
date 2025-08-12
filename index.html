@@ -6,14 +6,13 @@
   <title>mvvthw — terminal</title>
   <style>
     :root{
---bg: #121212;      /* deep charcoal grey background */
---fg: #D8E8D8;      /* soft off-white with a hint of green */
---muted: #7A8A7A;   /* muted grey-green for secondary text */
---accent: #32C85A;  /* bright, fresh green for accents */
---ok: #3DDC84;      /* positive/confirmation green */
---warn: #F5C84C;    /* warm gold for warnings */
---err: #FF6B6B;     /* soft red for errors */
-
+      --bg:#0b0f14;
+      --fg:#d8dee9;
+      --muted:#7f8c99;
+      --accent:#7dd3fc;
+      --ok:#34d399;
+      --warn:#fbbf24;
+      --err:#fb7185;
       --font: ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono", Consolas, monospace;
     }
     *{box-sizing:border-box}
@@ -26,10 +25,31 @@
     .dot.red{background:#ff5f56}.dot.yellow{background:#ffbd2e}.dot.green{background:#27c93f}
     .titlebar .path{color:var(--muted);font-size:14px}
     .output{font-size:clamp(14px,1.6vw,16px);line-height:1.6;white-space:pre-wrap}
-    .cmdline {background: var(--bg);backdrop-filter: none;}
+    .cmdline{
+  display:flex;
+  align-items:center;
+  flex-wrap:nowrap;
+  gap:8px;
+  margin-top:8px;
+  position:sticky;
+  bottom:0;
+  padding:10px 0;
+  background:none;
+  backdrop-filter:none;
+}
     .prompt{color:var(--accent)}
-    #input{flex:1;background:transparent;border:none;outline:none;color:var(--fg);font:inherit;min-height:44px;padding:6px 0}
-    .cursor{display:inline-block;width:9px;height:18px;background:var(--fg);margin-left:2px;animation:blink 1.1s steps(1) infinite}
+    #input{
+  flex:1;
+  min-width:0;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:var(--fg);
+  font:inherit;
+  min-height:44px;
+  padding:6px 0;
+}
+    .cursor{display:none !important}
     @keyframes blink{50%{opacity:0}}
     a{color:var(--accent);text-decoration:none}
     a:hover{text-decoration:underline}
@@ -50,16 +70,14 @@
 /* Mobile tuning */
 #ascii-art{margin:0; white-space:pre; line-height:1.05}
 @media (max-width:640px){
-  #input::placeholder {
-  color: var(--muted);
-  opacity: 1;
-}
-@media (min-width: 641px) {
-  #input::placeholder {
-    color: transparent;
-  }
+  #input::placeholder{color:var(--muted);opacity:1}
 }
 
+  
+/* Mobile-only input placeholder */
+#input::placeholder{color:var(--muted);opacity:1}
+@media (min-width:641px){
+  #input::placeholder{color:transparent}
 }
 
   </style>
@@ -77,7 +95,7 @@
       <div class="cmdline">
         <span class="prompt">guest@mvvthw:~$</span>
         <input id="input" type="text" autocomplete="off" spellcheck="false" placeholder="Tap here to type" />
-        <span class="cursor"></span>
+        
       </div>
       <div class="footer">
         <span>Type <span class="tag">help</span> to see commands</span>
