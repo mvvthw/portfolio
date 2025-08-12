@@ -27,7 +27,8 @@
     .dot{width:12px;height:12px;border-radius:50%}
     .dot.red{background:#ff5f56}.dot.yellow{background:#ffbd2e}.dot.green{background:#27c93f}
     .titlebar .path{color:var(--muted);font-size:14px}
-    .output{font-size:clamp(14px,1.6vw,16px);line-height:1.6;white-space:pre-wrap overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; }
+    .output{font-size:clamp(14px,1.6vw,16px);line-height:1.6;white-space:pre-wrap overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; max-width:100%;}
+
     .cmdline{display:flex;gap:8px;align-items:center;margin-top:8px;position:sticky;bottom:0;padding:10px 0;background:linear-gradient(180deg, rgba(11,15,20,0) 0%, rgba(11,15,20,.85) 40%, rgba(11,15,20,1) 100%);backdrop-filter:blur(2px)}
     .prompt{color:var(--accent)}
     #input{flex:1;background:transparent;border:none;outline:none;color:var(--fg);font:inherit;min-height:44px;padding:6px 0}
@@ -47,43 +48,43 @@
 
 
     /* === CATEGORY GRID === */
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(3, 1fr); /* exactly 3 per row as requested */
-      gap:16px;
-      margin-top:12px;
-    }
-    .thumb{
-      display:flex;align-items:center;justify-content:center;
-      border:1px solid rgba(125,211,252,.25);
-      border-radius:12px;overflow:hidden;aspect-ratio:1/1;background:transparent;
-      touch-action:manipulation;
-    }
-    .thumb img{display:block;width:92%;height:92%;object-fit:contain}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+    .thumb{display:flex;align-items:center;justify-content:center;border:1px solid rgba(125,211,252,.25);border-radius:14px;overflow:hidden;aspect-ratio:1/1;background:transparent;touch-action:manipulation;padding:2px}
+    .thumb img{display:block;width:98%;height:98%;object-fit:contain}
     .cap{font-size:12px;color:var(--muted);margin-top:6px}
 
-    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:50;padding:24px}
+    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:9999;padding:24px;overscroll-behavior:contain}
     .lightbox.open{display:flex}
-    .lightbox img{max-width:96vw;max-height:90vh;border:1px solid rgba(125,211,252,.35);border-radius:12px}
+    .lightbox img{max-width:96vw;max-height:85vh;border:1px solid rgba(125,211,252,.35);border-radius:12px;pointer-events:auto}
     .lightbox .close{position:absolute;top:16px;right:18px;font-size:28px;line-height:1;cursor:pointer;color:var(--fg)}
 
     /* === RESPONSIVE TWEAKS === */
-      .scroll-hint{display:none}
+      
       @media (max-width:640px){
-        .output{font-size:13px}
-        .scroll-hint{display:block;color:var(--muted);font-size:12px;margin-top:6px}
+        .output{font-size:13pxmax-width:100%;}
+
+        
       }
 
     @media (max-width:640px){
       .wrap{padding:16px 12px max(16px, env(safe-area-inset-bottom))}
       .term{padding-bottom:112px}
-      .output{font-size:15px overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; }
-      .grid{gap:12px} /* still 3 per row; slightly tighter gap */
-      .thumb img{width:96%;height:96%}
+      .output{font-size:15px overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; max-width:100%;}
+
+      .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px} /* still 3 per row; slightly tighter gap */
+      .thumb img{display:block;width:98%;height:98%;object-fit:contain}
     }
     @media (min-width:1280px){
       .wrap{max-width:1200px}
-      .output{font-size:clamp(15px,1.2vw,18px) overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; }
+      .output{font-size:clamp(15px,1.2vw,18px) overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; max-width:100%;}
+
+    }
+
+  
+    .mobile-type-hint{display:none;margin-left:8px;border:1px solid var(--accent);color:var(--accent);
+      padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;user-select:none;background:rgba(125,211,252,.08)}
+    @media (max-width:640px){
+      .mobile-type-hint{display:inline-flex;align-items:center}
     }
 
   </style>
@@ -100,7 +101,7 @@
       <div id="output" class="output"></div>
       <div class="cmdline">
         <span class="prompt">guest@mvvthw:~$</span>
-        <input id="input" placeholder="" type="text" autocomplete="off" spellcheck="false" />
+        <input id="input" placeholder="" /><span class="mobile-type-hint" role="button" tabindex="0" aria-label="Tap to type">Tap here to type</span> type="text" autocomplete="off" spellcheck="false" />
         <span class="cursor"></span>
       </div>
       <div class="footer">
@@ -170,7 +171,7 @@
       if(out.scrollWidth > out.clientWidth && !already){
         const hint = document.createElement('div');
         hint.className='scroll-hint';
-        hint.textContent='Swipe sideways to see full art →';
+        hint.textContent='';
         out.insertAdjacentElement('afterend', hint);
         let hidden=false;
         const hide = ()=>{
@@ -188,10 +189,21 @@
 
 
     const originalOverflow = document.body.style.overflow;
-    function openLightbox() {
+    
+    let __originalOverflow = '';
+    function openLightbox(){
+      __originalOverflow = document.documentElement.style.overflow || '';
+      document.documentElement.style.overflow='hidden';
+      document.body.style.overflow='hidden';
       lb.classList.add('open');
       lb.setAttribute('aria-hidden','false');
-      document.body.style.overflow='hidden';
+    }
+    function closeLightbox(){
+      lb.classList.remove('open');
+      lb.setAttribute('aria-hidden','true');
+      lbImg.removeAttribute('src');
+      document.documentElement.style.overflow=__originalOverflow;
+      document.body.style.overflow='';
     }
     function closeLightbox() {
       lb.classList.remove('open');
@@ -352,7 +364,7 @@
       }
     });
 
-    lb.addEventListener('click', ()=>{ closeLightbox(); });
+    lb.addEventListener('click', (e)=>{ if(e.target === lb) { closeLightbox(); } });});
     document.querySelector('#lightbox .close').addEventListener('click', (e)=>{ e.stopPropagation(); closeLightbox(); });
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && lb.classList.contains('open')){ closeLightbox(); }});
 
@@ -361,21 +373,23 @@
     help();
     input.focus();
   
-    // Mobile-only 'Tap here to type' logic
+    
+  
+    // Mobile-only 'Tap here to type' logic (clean)
     (function(){
       const input = document.getElementById('input');
       const hint = document.querySelector('.mobile-type-hint');
       if(!input || !hint) return;
-      const isMobile = window.matchMedia('(max-width:640px)').matches;
+      const isMobile = matchMedia('(max-width:640px)').matches;
       if(!isMobile){ hint.style.display='none'; return; }
-      const hide = ()=>{ hint.style.display='none'; };
+      function show(){ hint.style.display='inline-flex'; }
+      function hide(){ hint.style.display='none'; }
       const focusInput = (e)=>{ e && e.preventDefault(); input.focus(); };
       hint.addEventListener('click', focusInput);
-      hint.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ focusInput(e);} });
+      hint.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') focusInput(e); });
       input.addEventListener('focus', hide, {passive:true});
       input.addEventListener('input', hide, {passive:true});
-      // If keyboard opens and viewport resizes, hide
-      window.addEventListener('resize', hide);
+      setTimeout(show, 0);
     })();
 
   </script>
