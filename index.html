@@ -27,7 +27,7 @@
     .dot{width:12px;height:12px;border-radius:50%}
     .dot.red{background:#ff5f56}.dot.yellow{background:#ffbd2e}.dot.green{background:#27c93f}
     .titlebar .path{color:var(--muted);font-size:14px}
-    .output{font-size:clamp(14px,1.6vw,16px);line-height:1.6;white-space:pre-wrap}
+    .output{font-size:clamp(14px,1.6vw,16px);line-height:1.6;white-space:pre-wrap overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; }
     .cmdline{display:flex;gap:8px;align-items:center;margin-top:8px;position:sticky;bottom:0;padding:10px 0;background:linear-gradient(180deg, rgba(11,15,20,0) 0%, rgba(11,15,20,.85) 40%, rgba(11,15,20,1) 100%);backdrop-filter:blur(2px)}
     .prompt{color:var(--accent)}
     #input{flex:1;background:transparent;border:none;outline:none;color:var(--fg);font:inherit;min-height:44px;padding:6px 0}
@@ -39,6 +39,12 @@
     .footer{position:absolute;left:0;right:0;bottom:8px;color:var(--muted);font-size:12px;padding:0 18px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
     .tag{display:inline-block;margin:2px 0;background:rgba(125,211,252,.1);border:1px solid var(--accent);padding:2px 8px;border-radius:999px;color:var(--accent)}
     .row.ok{color:var(--ok)}.row.warn{color:var(--warn)}.row.err{color:var(--err)}
+    .mobile-type-hint{display:none;margin-left:6px;border:1px dashed var(--muted);color:var(--muted);
+      padding:4px 10px;border-radius:999px;font-size:12px;user-select:none}
+    @media (max-width:640px){
+      .mobile-type-hint{display:inline-flex;align-items:center}
+    }
+
 
     /* === CATEGORY GRID === */
     .grid{
@@ -62,16 +68,22 @@
     .lightbox .close{position:absolute;top:16px;right:18px;font-size:28px;line-height:1;cursor:pointer;color:var(--fg)}
 
     /* === RESPONSIVE TWEAKS === */
+      .scroll-hint{display:none}
+      @media (max-width:640px){
+        .output{font-size:13px}
+        .scroll-hint{display:block;color:var(--muted);font-size:12px;margin-top:6px}
+      }
+
     @media (max-width:640px){
       .wrap{padding:16px 12px max(16px, env(safe-area-inset-bottom))}
       .term{padding-bottom:112px}
-      .output{font-size:15px}
+      .output{font-size:15px overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; }
       .grid{gap:12px} /* still 3 per row; slightly tighter gap */
       .thumb img{width:96%;height:96%}
     }
     @media (min-width:1280px){
       .wrap{max-width:1200px}
-      .output{font-size:clamp(15px,1.2vw,18px)}
+      .output{font-size:clamp(15px,1.2vw,18px) overflow-x:auto; white-space:pre; -webkit-overflow-scrolling:touch; }
     }
 
   </style>
@@ -88,7 +100,7 @@
       <div id="output" class="output"></div>
       <div class="cmdline">
         <span class="prompt">guest@mvvthw:~$</span>
-        <input id="input" type="text" autocomplete="off" spellcheck="false" />
+        <input id="input" placeholder="" type="text" autocomplete="off" spellcheck="false" />
         <span class="cursor"></span>
       </div>
       <div class="footer">
@@ -147,6 +159,33 @@
     const lb = document.getElementById('lightbox');
     const lbImg = document.getElementById('lb-img');
     const state = {history: [], index: -1, commands: {}, theme: 'dark'};
+
+    // Mobile-only scroll hint for wide ASCII
+    function addScrollHintIfNeeded(){
+      const out = document.querySelector('.output');
+      if(!out) return;
+      const isMobile = window.matchMedia('(max-width:640px)').matches;
+      if(!isMobile) return;
+      const already = document.querySelector('.scroll-hint');
+      if(out.scrollWidth > out.clientWidth && !already){
+        const hint = document.createElement('div');
+        hint.className='scroll-hint';
+        hint.textContent='Swipe sideways to see full art →';
+        out.insertAdjacentElement('afterend', hint);
+        let hidden=false;
+        const hide = ()=>{
+          if(hidden) return;
+          hint.style.display='none'; hidden=true;
+        };
+        out.addEventListener('scroll', ()=>{
+          if(out.scrollLeft>8) hide();
+        }, {passive:true});
+        setTimeout(hide, 4000);
+      }
+    }
+    window.addEventListener('load', addScrollHintIfNeeded);
+    window.addEventListener('resize', addScrollHintIfNeeded);
+
 
     const originalOverflow = document.body.style.overflow;
     function openLightbox() {
@@ -321,6 +360,24 @@
     banner();
     help();
     input.focus();
+  
+    // Mobile-only 'Tap here to type' logic
+    (function(){
+      const input = document.getElementById('input');
+      const hint = document.querySelector('.mobile-type-hint');
+      if(!input || !hint) return;
+      const isMobile = window.matchMedia('(max-width:640px)').matches;
+      if(!isMobile){ hint.style.display='none'; return; }
+      const hide = ()=>{ hint.style.display='none'; };
+      const focusInput = (e)=>{ e && e.preventDefault(); input.focus(); };
+      hint.addEventListener('click', focusInput);
+      hint.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ focusInput(e);} });
+      input.addEventListener('focus', hide, {passive:true});
+      input.addEventListener('input', hide, {passive:true});
+      // If keyboard opens and viewport resizes, hide
+      window.addEventListener('resize', hide);
+    })();
+
   </script>
 </body>
 </html>
