@@ -6,14 +6,13 @@
   <title>mvvthw — terminal</title>
   <style>
     :root{
---bg: #121212;      /* deep charcoal grey background */
---fg: #D8E8D8;      /* soft off-white with a hint of green */
---muted: #7A8A7A;   /* muted grey-green for secondary text */
---accent: #32C85A;  /* bright, fresh green for accents */
---ok: #3DDC84;      /* positive/confirmation green */
---warn: #F5C84C;    /* warm gold for warnings */
---err: #FF6B6B;     /* soft red for errors */
-
+      --bg:#0b0f14;
+      --fg:#d8dee9;
+      --muted:#7f8c99;
+      --accent:#7dd3fc;
+      --ok:#34d399;
+      --warn:#fbbf24;
+      --err:#fb7185;
       --font: ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono", Consolas, monospace;
     }
     *{box-sizing:border-box}
@@ -200,8 +199,15 @@
     }
 
     function help(){
-      const list = `\nCommands:\n  <span class="tag">about</span>        Who I am\n  <span class="tag">work</span>         List categories\n  <span class="tag">show [cat]</span>   Show a category grid\n  <span class="tag">contact</span>      Email & socials\n  <span class="tag">clear</span>        Clear the screen\n  <span class="tag">theme</span>        Toggle light/dark\n  <span class="tag">help</span>
-  <span class=\"tag\">credits</span>       People & companies I've worked with         Show this menu`;
+      const list = `
+Commands:
+  <span class="tag">about</span>        About me
+  <span class="tag">work</span>         List categories
+  <span class="tag">show</span> [cat]   Show a category (e.g., <code>show clothing</code>)
+  <span class="tag">contact</span>      Contact details
+  <span class="tag">theme</span>        Toggle light/dark
+  <span class="tag">credits</span>      People & companies I've worked with
+  <span class="tag">help</span>         Show this menu`;
       write(list);
     }
 
@@ -257,10 +263,9 @@
       }
     }
 
-    if(cmd === 'credits'){ credits(); return; }
-function notFound(cmd){ print(`Command not found: <code>${cmd}</code>. Type <span class="tag">help</span>.`, 'err'); }
+    function notFound(cmd){ print(`Command not found: <code>${cmd}</code>. Type <span class="tag">help</span>.`, 'err'); }
 
-    state.commands = { help, about, work, show, contact, clear, theme };
+    state.commands = { help, about, work, show, contact, clear, theme, credits };
 
     function run(cmd){
       if(!cmd) return;
